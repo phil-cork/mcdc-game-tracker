@@ -1,10 +1,10 @@
 import streamlit as st
 import pandas as pd
-from utils.charts import donut_chart, bar_chart
+from utils.charts import donut_chart
 
 st.set_page_config(layout="wide")
 
-def render(df, game_df, player_df, full_df):
+def render(game_df, player_df):
 
     stats_col, player_count_col = st.columns(2)
 
@@ -36,21 +36,3 @@ def render(df, game_df, player_df, full_df):
     with player_count_col:
         st.header("Player Count")
         st.altair_chart(donut_chart(game_df, category_col='number_of_players'))
-
-    scenario_col, difficulty_col = st.columns(2)
-
-    with scenario_col:
-        st.header("Scenarios")
-        st.altair_chart(
-            bar_chart(game_df,
-                    y='scenario:N', x='count', color='outcome:N', title='')
-        )
-
-    with difficulty_col:
-        st.header("Difficulty")
-        st.altair_chart(
-            bar_chart(game_df,
-                    y='difficulty:N', x='count', color='outcome:N', title="")
-        )
-
-    st.divider()

@@ -2,6 +2,20 @@ import altair as alt
 import pandas as pd
 import streamlit as st
 
+aspect_color_scheme = alt.Scale(
+    domain=["Aggression", "Basic", "Justice", "Leadership",
+            "Pool", "Protection", "Other"],
+    range=['#FF4500', 'lightgrey', '#FFD700', '#0086EB',
+           'pink', '#00C853', 'darkgrey']
+)
+
+scenario_color_scheme = alt.Scale(
+    domain=['Win', 'Loss'],
+    range=['#518cca', '#f78f3f']
+)
+
+# The standard aspect colors in Marvel Champions: The Card Game correspond to specific HEX codes used for deck building and card identification. The approximate hex codes are: Aggression (Red) #FF4500 or #F7481D, Leadership (Yellow/Gold) #FFD700 or #FFC331, Justice (Blue) #0086EB or #0052F2, and Protection (Green) #00C853 or #3DA35A. 
+
 def donut_chart(df: pd.DataFrame, category_col: str, value_col: str = None, title: str = "") -> alt.Chart:
     """
     Create a donut chart in Altair.
@@ -53,6 +67,7 @@ def bar_chart(df: pd.DataFrame,
               y=None,
               *,
               color=None,
+              colorScheme=None,
               height=600,
               width=300,
               title=None):
@@ -75,8 +90,16 @@ def bar_chart(df: pd.DataFrame,
         "y": y_enc
     }
     
-    if color is not None:
+    if color is not None and colorScheme is None:
         encodings["color"] = alt.Color(color, title=str(color))
+
+    elif color is not None and colorScheme == 'aspect':
+        encodings['color'] = alt.Color(color, title=str(color),
+                                       scale=aspect_color_scheme)
+    
+    elif color is not None and colorScheme == 'scenario':
+        encodings['color'] = alt.Color(color, title=str(color),
+                                       scale=scenario_color_scheme)
 
 
     # Build chart
