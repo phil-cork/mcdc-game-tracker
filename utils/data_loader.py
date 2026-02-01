@@ -123,14 +123,8 @@ def most_frequent_value(df: pd.DataFrame, column: str) -> str:
     return str(most_freq)
 
 
-import pandas as pd
+def explode_with_weights(df, col, new_col, sep=", "):
 
-def explode_with_weights(df, col, sep=", "):
-    """
-    Takes a DataFrame and a column of comma-separated strings,
-    explodes it into one row per item, and assigns weights
-    such that weights per original row sum to 1.
-    """
     # Split into lists
     df = df.copy()
     df["_items"] = df[col].str.split(sep)
@@ -145,6 +139,11 @@ def explode_with_weights(df, col, sep=", "):
     out["value"] = 1 / out["_n_items"]
 
     # Clean up
-    out = out.drop(columns=["_n_items"]).rename(columns={"_items": "item"})
+    out = out.drop(columns=["_n_items"]).rename(columns={"_items": new_col})
 
     return out
+
+
+def replace_with_other(df, allowed_set:set, col:str):
+    df[col] = df[col].where(df[col].isin(allowed_set), "Other")
+    return df
