@@ -111,9 +111,44 @@ def bar_chart(df: pd.DataFrame,
     
     return chart
 
+def heatmap_chart(df, x:str, y:str, color:str,
+                  x_title:str, y_title:str, color_title:str):
 
+    heatmap = (
+        alt.Chart(df)
+        .mark_rect(stroke="black",
+        strokeWidth=1)
+        .encode(
+            x=alt.X(
+                f"{x}:N",
+                title="",
+                sort="ascending",
+                axis=alt.Axis(orient="top")
+            ),
+            y=alt.Y(
+                f"{y}:N",
+                title="",
+                sort="ascending",
+                axis=alt.Axis(labelLimit=300)
+            ),
+            color=alt.Color(
+                "value:N",
+                title="Played"
+            ),
+            tooltip=[
+                alt.Tooltip(x, title=x_title),
+                alt.Tooltip(y, title=y_title),
+                alt.Tooltip(color, title=color_title)
+            ]
+        )
+        .properties(
+            width=450,
+            height=800
+        )
+    )
 
-import streamlit as st
+    return heatmap
+
 
 def smart_metric(label: str, value: str):
     """
@@ -147,4 +182,5 @@ def smart_metric(label: str, value: str):
         <div style="font-size:{value_font}px; font-weight:600; line-height:1.1; color:white;">{value}</div>
     </div>
     """, unsafe_allow_html=True)
+
 

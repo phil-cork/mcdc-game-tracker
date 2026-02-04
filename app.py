@@ -1,7 +1,7 @@
 import streamlit as st
 from streamlit_autorefresh import st_autorefresh
 from utils.data_loader import run_data_pipeline
-from tabs import stats, data_demo, scenarios, heroes, players
+from tabs import stats, data_demo, scenarios, heroes, players, heatmap
 
 st.set_page_config(layout="wide")
 
@@ -11,11 +11,12 @@ st_autorefresh(interval=30_000, key="autorefresh_timer")
 st.title("MC/DC Game Tracker")
 
 # Read sheet directly (always fresh)
-df, game_df, player_df, full_df = run_data_pipeline()
+df, game_df, player_df, aspect_df, heatmap_df, full_df = run_data_pipeline()
 
-stats_tab, scenarios_tab, heroes_tab, player_tab, demo_tab = st.tabs(['Stats',
+stats_tab, scenarios_tab, heroes_tab, heatmap_tab, player_tab, demo_tab = st.tabs(['Stats',
                                                                      'Scenarios',
                                                                      'Heroes',
+                                                                     'Heatmap',
                                                                      'Players',
                                                                      'DEMO'])
 
@@ -26,7 +27,10 @@ with scenarios_tab:
     scenarios.render(game_df)
 
 with heroes_tab:
-    heroes.render(player_df)
+    heroes.render(aspect_df)
+
+with heatmap_tab:
+    heatmap.render(heatmap_df)
 
 with player_tab:
     players.render(player_df)

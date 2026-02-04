@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import streamlit as st
 import re
 
@@ -11,9 +12,16 @@ def run_data_pipeline():
     player_df = reshape_players(df)
     player_df = merge_aspects(player_df)
 
+    aspect_df = explode_with_weights(player_df, 'aspect', 'individual_aspect')
+    aspect_df = replace_with_other(aspect_df,
+                                   allowed_set = set(['Aggression', 'Basic', 'Leadership', 'Justice', 'Pool', 'Protection']),
+                                   col='individual_aspect')
+    
+    heatmap_df = get_heatmap_data(aspect_df[['hero', 'individual_aspect', 'value']])
+
     full_df = pd.merge(player_df, game_df, how='left', on='submission_id')
 
-    return df, game_df, player_df, full_df
+    return df, game_df, player_df, aspect_df, heatmap_df, full_df
 
 
 def load_data():
@@ -147,3 +155,34 @@ def explode_with_weights(df, col, new_col, sep=", "):
 def replace_with_other(df, allowed_set:set, col:str):
     df[col] = df[col].where(df[col].isin(allowed_set), "Other")
     return df
+
+def get_heatmap_data(current_form_df):
+
+    aspect_list = ['Aggression', 'Basic', 'Justice', 'Leadership',
+                                       'Pool', "Protection"]
+    
+    hero_list = ["Black Panther (T'challa)", "Captain Marvel", "Ironman", "She-Hulk",
+        "Spider-Man (Peter)", "Captain America", "Ms. Marvel", "Thor", 
+        "Black Widow", "Doctor Strange", "Hulk", "Hawkeye", "Spider-Woman", 
+        "Ant-Man", "Wasp", "Quicksilver", "Scarlet Witch", "Groot", "Rocket Racoon", 
+        "Star-Lord", "Gamora", "Drax", "Venom", "Adam Warlock", "Spectrum", "Nebula",
+        "War Machine", "Valkyrie", "Vision", "Ghost-Spider", "Spider-Man (Miles)",
+        "Nova", "Ironheart", "Spider-Ham", "Sp//dr", "Colossus", "Shadowcat", "Cyclops",
+        "Phoenix", "Wolverine", "Storm", "Gambit", "Rogue", "Cable", "Domino", "Psylocke",
+        "Angel", "X-23", "Deadpool", "Magik", "Bishop", "Iceman", "Jubilee", "Nightcrawler",
+        "Magneto", "Maria Hill", "Nick Fury", "Black Panther (Shuri)", "Silk", "Falcon",
+        "Winter Soldier", "Tigra", "Hulkling", "Wonder Man", "Hercules", "Daredevil", "Echo",
+        "Jessica Jones", "Luke Cage"]
+
+    heatmap_df = pd.MultiIndex.from_product(
+            [hero_list, aspect_list],
+            names=['hero', 'individual_aspect']
+        ).to_frame(index=False)
+    
+    heatmap_df = pd.merge(heatmap_df, current_form_df, how='left', on=['hero', 'individual_aspect']).fillna(0)
+    heatmap_df.sort_values(by='hero', inplace=True)
+    heatmap_df = heatmap_df.reset_index().drop('index', axis=1)
+
+    heatmap_df['value'] = np.where(heatmap_df['value'] > 0, 1, 0)
+
+    return heatmap_df
