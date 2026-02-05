@@ -156,6 +156,7 @@ def replace_with_other(df, allowed_set:set, col:str):
     df[col] = df[col].where(df[col].isin(allowed_set), "Other")
     return df
 
+
 def get_heatmap_data(current_form_df):
 
     aspect_list = ['Aggression', 'Basic', 'Justice', 'Leadership',
@@ -182,6 +183,7 @@ def get_heatmap_data(current_form_df):
     heatmap_df = pd.merge(heatmap_df, current_form_df, how='left', on=['hero', 'individual_aspect']).fillna(0)
     heatmap_df.sort_values(by='hero', inplace=True)
     heatmap_df = heatmap_df.reset_index().drop('index', axis=1)
+    heatmap_df = heatmap_df.drop_duplicates()
 
     heatmap_df['value'] = np.where(heatmap_df['value'] > 0, 1, 0)
 
