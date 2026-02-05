@@ -68,6 +68,7 @@ def bar_chart(df: pd.DataFrame,
               *,
               color=None,
               colorScheme=None,
+              text=None,
               height=600,
               width=300,
               title=None):
@@ -109,21 +110,35 @@ def bar_chart(df: pd.DataFrame,
         title=title
     )
     
-    return chart
+    if text is not None:
+        chart_text = chart.mark_text(
+        align='left',
+        baseline='middle',
+        dx=10,    
+        color='white',
+        size=16
+    ).encode(
+        text=text
+    )
+        return chart + chart_text
+
+    else:
+        return chart
+    
 
 def heatmap_chart(df, x:str, y:str, color:str,
                   x_title:str, y_title:str, color_title:str):
 
     heatmap = (
         alt.Chart(df)
-        .mark_rect(stroke="black",
+        .mark_rect(stroke="grey",
         strokeWidth=1)
         .encode(
             x=alt.X(
                 f"{x}:N",
                 title="",
                 sort="ascending",
-                axis=alt.Axis(orient="top")
+                axis=alt.Axis(orient="top", labelAngle=-45)
             ),
             y=alt.Y(
                 f"{y}:N",
@@ -133,7 +148,9 @@ def heatmap_chart(df, x:str, y:str, color:str,
             ),
             color=alt.Color(
                 "value:N",
-                title="Played"
+                title="Played",
+                legend=None,
+                scale=alt.Scale(domain=[0,1], range=['black', '#0086EB'])
             ),
             tooltip=[
                 alt.Tooltip(x, title=x_title),
