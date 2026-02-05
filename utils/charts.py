@@ -2,21 +2,22 @@ import altair as alt
 import pandas as pd
 import streamlit as st
 
-aspect_color_scheme = alt.Scale(
+# create custom color schemes referenced throughout
+color_scheme_map = {
+    'aspect' : alt.Scale(
     domain=["Aggression", "Basic", "Justice", "Leadership",
             "Pool", "Protection", "Other"],
     range=['#FF4500', 'lightgrey', '#FFD700', '#0086EB',
-           'pink', '#00C853', 'darkgrey']
-)
-
-scenario_color_scheme = alt.Scale(
+           'pink', '#00C853', 'darkgrey']),
+    
+    'scenario' : alt.Scale(
     domain=['Win', 'Loss'],
-    range=['#518cca', '#f78f3f']
-)
+    range=['#518cca', '#f78f3f'])
+    }
 
-# The standard aspect colors in Marvel Champions: The Card Game correspond to specific HEX codes used for deck building and card identification. The approximate hex codes are: Aggression (Red) #FF4500 or #F7481D, Leadership (Yellow/Gold) #FFD700 or #FFC331, Justice (Blue) #0086EB or #0052F2, and Protection (Green) #00C853 or #3DA35A. 
 
-def donut_chart(df: pd.DataFrame, category_col: str, value_col: str = None, title: str = "") -> alt.Chart:
+def donut_chart(df: pd.DataFrame, category_col: str, value_col: str = None,
+                title: str = "", colorScheme = None) -> alt.Chart:
     """
     Create a donut chart in Altair.
 
@@ -30,6 +31,8 @@ def donut_chart(df: pd.DataFrame, category_col: str, value_col: str = None, titl
         Column with values/counts. If None, counts each category
     title : str, optional
         Chart title
+    colorScheme: str, optional
+        sets color Scale based on key provided. If None, altiar default
 
     Returns
     -------
@@ -47,13 +50,22 @@ def donut_chart(df: pd.DataFrame, category_col: str, value_col: str = None, titl
     # Compute angles
     df_plot["angle"] = df_plot[value_col] / df_plot[value_col].sum()
 
-    # Base pie chart
+    if colorScheme not in color_scheme_map:
+        color_encoding = alt.Color(f"{category_col}:N",legend=alt.Legend(title=category_col))
+
+    else:
+        color_encoding = alt.Color(
+            f"{category_col}:N",
+            scale=color_scheme_map[colorScheme],
+            legend=alt.Legend(title=category_col)
+        )
+            
     pie = (
         alt.Chart(df_plot)
         .mark_arc(innerRadius=50)  # innerRadius makes it a donut
         .encode(
             theta=alt.Theta(field="angle", type="quantitative"),
-            color=alt.Color(field=category_col, type="nominal", legend=alt.Legend(title=category_col)),
+            color=color_encoding,
             tooltip=[alt.Tooltip(category_col), alt.Tooltip(value_col)]
         )
         .properties(title=title, width=400, height=400)
@@ -96,11 +108,11 @@ def bar_chart(df: pd.DataFrame,
 
     elif color is not None and colorScheme == 'aspect':
         encodings['color'] = alt.Color(color, title=str(color),
-                                       scale=aspect_color_scheme)
+                                       scale=color_scheme_map[colorScheme])
     
     elif color is not None and colorScheme == 'scenario':
         encodings['color'] = alt.Color(color, title=str(color),
-                                       scale=scenario_color_scheme)
+                                       scale=color_scheme_map[colorScheme])
 
 
     # Build chart
