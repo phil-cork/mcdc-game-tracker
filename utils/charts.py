@@ -51,13 +51,14 @@ def donut_chart(df: pd.DataFrame, category_col: str, value_col: str = None,
     df_plot["angle"] = df_plot[value_col] / df_plot[value_col].sum()
 
     if colorScheme not in color_scheme_map:
-        color_encoding = alt.Color(f"{category_col}:N",legend=alt.Legend(title=category_col))
+        color_encoding = alt.Color(f"{category_col}:N",
+                                   legend=alt.Legend(title=category_col, orient='bottom-right'))
 
     else:
         color_encoding = alt.Color(
             f"{category_col}:N",
             scale=color_scheme_map[colorScheme],
-            legend=alt.Legend(title=category_col)
+            legend=alt.Legend(title=category_col, orient='bottom-right')
         )
             
     pie = (
@@ -104,15 +105,18 @@ def bar_chart(df: pd.DataFrame,
     }
     
     if color is not None and colorScheme is None:
-        encodings["color"] = alt.Color(color, title=str(color))
+        encodings["color"] = alt.Color(color, title=str(color),
+                                       legend=alt.Legend(orient='bottom'))
 
     elif color is not None and colorScheme == 'aspect':
         encodings['color'] = alt.Color(color, title=str(color),
-                                       scale=color_scheme_map[colorScheme])
+                                       scale=color_scheme_map[colorScheme],
+                                       legend=alt.Legend(orient='bottom'))
     
     elif color is not None and colorScheme == 'scenario':
         encodings['color'] = alt.Color(color, title=str(color),
-                                       scale=color_scheme_map[colorScheme])
+                                       scale=color_scheme_map[colorScheme],
+                                       legend=alt.Legend(orient='bottom'))
 
 
     # Build chart
