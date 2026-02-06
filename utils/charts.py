@@ -58,8 +58,7 @@ def donut_chart(df: pd.DataFrame, category_col: str, value_col: str = None,
         color_encoding = alt.Color(
             f"{category_col}:N",
             scale=color_scheme_map[colorScheme],
-            legend=alt.Legend(title=category_col, orient='bottom-right')
-        )
+            legend=None)
             
     pie = (
         alt.Chart(df_plot)
@@ -130,7 +129,7 @@ def bar_chart(df: pd.DataFrame,
         chart_text = chart.mark_text(
         align='left',
         baseline='middle',
-        dx=10,    
+        dx=8,    
         color='white',
         size=16
     ).encode(
