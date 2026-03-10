@@ -11,7 +11,7 @@ def render(game_df):
         st.header("Scenarios")
         st.altair_chart(
             bar_chart(game_df,
-                    y='scenario:N', x='count', color='outcome:N',
+                    y='scenario', x='count', color='outcome',
                      colorScheme='scenario', title='')
         )
 
@@ -19,5 +19,5 @@ def render(game_df):
         st.header("Difficulty")
         st.altair_chart(
             bar_chart(game_df,
-                    y='difficulty:N', x='count', color='outcome:N', colorScheme='scenario', title="")
+                    y='difficulty', x='count', color='outcome', colorScheme='scenario', title="")
         )

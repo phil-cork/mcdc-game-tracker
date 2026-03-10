@@ -3,13 +3,13 @@ import numpy as np
 import streamlit as st
 import re
 
-def run_data_pipeline():
-    df = load_data()
-    df = normalize_column_names(df)
-
+def run_data_pipeline(df):
+    
     game_df = df[['submission_id', 'submission_time', 'region', 'number_of_players',
               'scenario', 'difficulty', 'skirmish_mode', 'outcome']].copy().drop_duplicates()
+    
     player_df = reshape_players(df)
+
     player_df = merge_aspects(player_df)
 
     aspect_df = explode_with_weights(player_df, 'aspect', 'individual_aspect')
@@ -21,11 +21,12 @@ def run_data_pipeline():
 
     full_df = pd.merge(player_df, game_df, how='left', on='submission_id')
 
-    return df, game_df, player_df, aspect_df, heatmap_df, full_df
+    return game_df, player_df, aspect_df, heatmap_df, full_df
 
 
 def load_data():
     df = pd.read_csv(st.secrets["sheets"]["spreadsheet"])
+    df = normalize_column_names(df)
     return df
 
 

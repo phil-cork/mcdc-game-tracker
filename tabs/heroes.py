@@ -9,7 +9,7 @@ def render(aspect_df):
     st.altair_chart(
         bar_chart(aspect_df,
                   y='hero:N', x='value', title="",
-                  color='individual_aspect:N', colorScheme='aspect',
+                  color='individual_aspect', colorScheme='aspect',
                   height=1200, width=600
                   )
     )

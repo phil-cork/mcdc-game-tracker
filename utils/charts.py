@@ -88,14 +88,14 @@ def bar_chart(df: pd.DataFrame,
     
     # Handle y-axis: count if None or 'count'
     if y is None or (isinstance(y, str) and y.lower() == "count"):
-        y_enc = alt.Y('count()', title='Count', axis=alt.Axis(format='d'))
+        y_enc = alt.Y('count()', title='Count', axis=alt.Axis(format='d', title=""))
     else:
-        y_enc = alt.Y(y, title=str(y), axis=alt.Axis(labelLimit=300), sort='-x')
+        y_enc = alt.Y(y, title=str(y), axis=alt.Axis(labelLimit=300, title=""), sort='-x')
 
     if x is None or (isinstance(x, str) and x.lower() == "count"):
-        x_enc = alt.X('count()', title='Count', axis=alt.Axis(format='d'))
+        x_enc = alt.X('count()', title='Count', axis=alt.Axis(format='d', title=""))
     else:
-        x_enc = alt.X(x, title=str(x), axis=alt.Axis(labelLimit=300), sort='-y')
+        x_enc = alt.X(x, title=str(x), axis=alt.Axis(labelLimit=300, title=""), sort='-y')
     
     # Prepare encodings
     encodings = {

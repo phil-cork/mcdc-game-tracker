@@ -12,8 +12,8 @@ def render(aspect_df):
     with col1:
         st.altair_chart(
         bar_chart(aspects_played,
-                  y='individual_aspect:N', x='plays', title="",
-                  color='individual_aspect:N', colorScheme='aspect',
+                  y='individual_aspect', x='plays', title="",
+                  color='individual_aspect', colorScheme='aspect',
                   height=600, width=600, text='plays'))
         
     with col2:
