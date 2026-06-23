@@ -3,6 +3,24 @@ import numpy as np
 import streamlit as st
 import re
 
+hero_list = ["Black Panther (T'challa)", "Captain Marvel", "Ironman", "She-Hulk",
+        "Spider-Man (Peter)", "Captain America", "Ms. Marvel", "Thor", 
+        "Black Widow", "Doctor Strange", "Hulk", "Hawkeye", "Spider-Woman", 
+        "Ant-Man", "Wasp", "Quicksilver", "Scarlet Witch", "Groot", "Rocket Racoon", 
+        "Star-Lord", "Gamora", "Drax", "Venom", "Adam Warlock", "Spectrum", "Nebula",
+        "War Machine", "Valkyrie", "Vision", "Ghost-Spider", "Spider-Man (Miles)",
+        "Nova", "Ironheart", "Spider-Ham", "Sp//dr", "Colossus", "Shadowcat", "Cyclops",
+        "Phoenix", "Wolverine", "Storm", "Gambit", "Rogue", "Cable", "Domino", "Psylocke",
+        "Angel", "X-23", "Deadpool", "Magik", "Bishop", "Iceman", "Jubilee", "Nightcrawler",
+        "Magneto", "Maria Hill", "Nick Fury", "Black Panther (Shuri)", "Silk", "Falcon",
+        "Winter Soldier", "Tigra", "Hulkling", "Wonder Man", "Hercules", "Daredevil", "Echo",
+        "Jessica Jones", "Luke Cage"]
+
+hero_list.sort()
+
+aspect_list = ['Aggression', 'Justice', 'Leadership', 'Protection',
+                   'Pool', "Basic", "Multi-Aspect"]
+
 def run_data_pipeline(df):
     
     game_df = df[['submission_id', 'submission_time', 'region', 'number_of_players',
@@ -126,23 +144,7 @@ def get_heatmap_data(current_form_df):
     # create a new column that gives each entry a count of 1
     # to test abensence with fillna below
     current_form_df['value'] = 1
-
-    aspect_list = ['Aggression', 'Justice', 'Leadership', 'Protection',
-                   'Pool', "Basic"]
     
-    hero_list = ["Black Panther (T'challa)", "Captain Marvel", "Ironman", "She-Hulk",
-        "Spider-Man (Peter)", "Captain America", "Ms. Marvel", "Thor", 
-        "Black Widow", "Doctor Strange", "Hulk", "Hawkeye", "Spider-Woman", 
-        "Ant-Man", "Wasp", "Quicksilver", "Scarlet Witch", "Groot", "Rocket Racoon", 
-        "Star-Lord", "Gamora", "Drax", "Venom", "Adam Warlock", "Spectrum", "Nebula",
-        "War Machine", "Valkyrie", "Vision", "Ghost-Spider", "Spider-Man (Miles)",
-        "Nova", "Ironheart", "Spider-Ham", "Sp//dr", "Colossus", "Shadowcat", "Cyclops",
-        "Phoenix", "Wolverine", "Storm", "Gambit", "Rogue", "Cable", "Domino", "Psylocke",
-        "Angel", "X-23", "Deadpool", "Magik", "Bishop", "Iceman", "Jubilee", "Nightcrawler",
-        "Magneto", "Maria Hill", "Nick Fury", "Black Panther (Shuri)", "Silk", "Falcon",
-        "Winter Soldier", "Tigra", "Hulkling", "Wonder Man", "Hercules", "Daredevil", "Echo",
-        "Jessica Jones", "Luke Cage"]
-
     heatmap_df = pd.MultiIndex.from_product(
             [hero_list, aspect_list],
             names=['hero', 'aspect']
@@ -154,5 +156,23 @@ def get_heatmap_data(current_form_df):
     heatmap_df = heatmap_df.drop_duplicates()
 
     heatmap_df['value'] = np.where(heatmap_df['value'] > 0, 1, 0)
+
+    multi_aspect_heroes = ['Adam Warlock', 'Spider-Woman']
+    # drop multi-aspect from list
+    non_ma_aspects = aspect_list[:6]
+
+
+    heatmap_df['value'] = heatmap_df['value'].case_when([
+    # make all multi-aspect heroes NA for everything but MA
+    (
+        (heatmap_df['hero'].isin(multi_aspect_heroes)) & (heatmap_df['aspect'].isin(non_ma_aspects)),
+        np.nan
+    ),
+    # for all heroes not MA, set it to NA
+    (
+        (~heatmap_df['hero'].isin(multi_aspect_heroes)) & (heatmap_df['aspect'] == "Multi-Aspect"),
+        np.nan
+    )
+])
 
     return heatmap_df

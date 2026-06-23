@@ -1,6 +1,4 @@
 import streamlit as st
-import pandas as pd
-from utils.charts import donut_chart
 
 st.set_page_config(layout="wide")
 

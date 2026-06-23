@@ -1,6 +1,5 @@
 import altair as alt
 import pandas as pd
-import streamlit as st
 
 # create custom color schemes referenced throughout
 color_scheme_map = {
@@ -14,6 +13,9 @@ color_scheme_map = {
     domain=['Win', 'Loss'],
     range=['#518cca', '#f78f3f'])
     }
+
+aspect_sort_order = ['Aggression', 'Justice', "Leadership", 'Protection',
+                     'Pool', 'Basic', 'Multi-Aspect']
 
 
 def donut_chart(df: pd.DataFrame, category_col: str, value_col: str = None,
@@ -145,42 +147,25 @@ def bar_chart(df: pd.DataFrame,
         return chart
     
 
-def heatmap_chart(df, x:str, y:str, color:str,
-                  x_title:str, y_title:str, color_title:str):
+def dot_matrix_plot(df, x:str, y:str, x_sort_order=[]):
+    
+    base = alt.Chart(df)
 
-    heatmap = (
-        alt.Chart(df)
-        .mark_rect(stroke="grey",
-        strokeWidth=1)
-        .encode(
-            x=alt.X(
-                f"{x}:N",
-                title="",
-                sort="ascending",
-                axis=alt.Axis(orient="top", labelAngle=-45)
-            ),
-            y=alt.Y(
-                f"{y}:N",
-                title="",
-                sort="ascending",
-                axis=alt.Axis(labelLimit=300)
-            ),
-            color=alt.Color(
-                "value:N",
-                title="Played",
-                legend=None,
-                scale=alt.Scale(domain=[0,1], range=['black', '#0086EB'])
-            ),
-            tooltip=[
-                alt.Tooltip(x, title=x_title),
-                alt.Tooltip(y, title=y_title),
-                alt.Tooltip(color, title=color_title)
-            ]
-        )
-        .properties(
-            width=450,
-            height=800
-        )
+    # Horizontal guide line per row, spanning all columns
+    lines = base.mark_line(color='darkgrey', strokeWidth=.5).encode(
+        x=alt.X(f'{x}:N', axis=alt.Axis(orient='top'), title=None, sort=x_sort_order),
+        y=alt.Y(f'{y}:N', sort='ascending', title=None, axis=alt.Axis(labelLimit=300)),
+        detail=f'{y}:N'   # keeps each row's line separate
     )
 
-    return heatmap
+    dots_df = df.dropna()
+
+    # Dots on top
+    dots = alt.Chart(dots_df).mark_circle(size=250).encode(
+        x=alt.X(f'{x}:N', sort=x_sort_order),
+        y=alt.Y(f'{y}:N', sort='ascending'),
+        color=alt.Color('aspect:N', scale=color_scheme_map.get('aspect'), legend=None),
+        opacity=alt.condition(alt.datum.value, alt.value(1.0), alt.value(0.15))
+    )
+
+    return (lines + dots)

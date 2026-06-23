@@ -1,8 +1,7 @@
 import streamlit as st
-import pandas as pd
-import altair as alt
-from utils.charts import bar_chart, heatmap_chart
-from utils.data_loader import get_heatmap_data
+from utils.charts import dot_matrix_plot, aspect_sort_order
+from utils.data_loader import hero_list
+
 
 def render(heatmap_df):
 
@@ -13,22 +12,21 @@ def render(heatmap_df):
 
     with col1:
 
-        heatmap = heatmap_chart(heatmap_df.iloc[0:138,:], x='aspect', y='hero', color='value',
-                            x_title="Aspect", y_title="Hero", color_title="Value")
+        hero_list_a = hero_list[:23]
+        heatmap_df_a = heatmap_df[heatmap_df['hero'].isin(hero_list_a)]
 
-        st.altair_chart(heatmap, use_container_width=False)
+        st.altair_chart(dot_matrix_plot(heatmap_df_a, x='aspect', y='hero', x_sort_order=aspect_sort_order))
 
     with col2:
 
-        heatmap = heatmap_chart(heatmap_df.iloc[138:276, :], x='aspect', y='hero', color='value',
-                            x_title="Aspect", y_title="Hero", color_title="Value")
+        hero_list_b = hero_list[23:46]
+        heatmap_df_b = heatmap_df[heatmap_df['hero'].isin(hero_list_b)]
 
-        st.altair_chart(heatmap, use_container_width=False)
+        st.altair_chart(dot_matrix_plot(heatmap_df_b, x='aspect', y='hero', x_sort_order=aspect_sort_order))
 
     with col3:
 
-        heatmap = heatmap_chart(heatmap_df.iloc[276:,:], x='aspect', y='hero', color='value',
-                            x_title="Aspect", y_title="Hero", color_title="Value")
+        hero_list_c = hero_list[46:]
+        heatmap_df_c = heatmap_df[heatmap_df['hero'].isin(hero_list_c)]
 
-        st.altair_chart(heatmap, use_container_width=False)
-
+        st.altair_chart(dot_matrix_plot(heatmap_df_c, x='aspect', y='hero', x_sort_order=aspect_sort_order))
