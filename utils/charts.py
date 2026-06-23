@@ -6,9 +6,9 @@ import streamlit as st
 color_scheme_map = {
     'aspect' : alt.Scale(
     domain=["Aggression", "Basic", "Justice", "Leadership",
-            "Pool", "Protection", "Other"],
-    range=['#FF4500', 'lightgrey', '#FFD700', '#0086EB',
-           'pink', '#00C853', 'darkgrey']),
+            "Pool", "Protection", "Multi-Aspect", "Other"],
+    range=['#FF4500', '#b4b4b4', '#FFD700', '#0086EB',
+           'pink', '#00C853', "#8766C8", '#545454']),
     
     'scenario' : alt.Scale(
     domain=['Win', 'Loss'],
@@ -81,21 +81,25 @@ def bar_chart(df: pd.DataFrame,
               color=None,
               colorScheme=None,
               text=None,
-              height=600,
+              height=1800,
               width=300,
               title=None):
 
     
     # Handle y-axis: count if None or 'count'
     if y is None or (isinstance(y, str) and y.lower() == "count"):
-        y_enc = alt.Y('count()', title='Count', axis=alt.Axis(format='d', title=""))
+        y_enc = alt.Y('count()', title='Count', axis=alt.Axis(format='d', title="", tickMinStep=1))
+        height = max(len(df[y].drop_duplicates())*30,600)
     else:
-        y_enc = alt.Y(y, title=str(y), axis=alt.Axis(labelLimit=300, title=""), sort='-x')
+        y_enc = alt.Y(y, title=str(y), axis=alt.Axis(labelLimit=300, title="", tickMinStep=1), sort='-x')
+        height = max(len(df[y].drop_duplicates())*30,600)
 
     if x is None or (isinstance(x, str) and x.lower() == "count"):
-        x_enc = alt.X('count()', title='Count', axis=alt.Axis(format='d', title=""))
+        x_enc = alt.X('count()', title='Count', axis=alt.Axis(format='d', title="", tickMinStep=1))
+        height = max(len(df[y].drop_duplicates())*30,600)
     else:
-        x_enc = alt.X(x, title=str(x), axis=alt.Axis(labelLimit=300, title=""), sort='-y')
+        x_enc = alt.X(x, title=str(x), axis=alt.Axis(labelLimit=300, title="", tickMinStep=1), sort='-y')
+        height = max(len(df[y].drop_duplicates())*30,600)
     
     # Prepare encodings
     encodings = {
@@ -180,39 +184,3 @@ def heatmap_chart(df, x:str, y:str, color:str,
     )
 
     return heatmap
-
-
-def smart_metric(label: str, value: str):
-    """
-    Streamlit metric replacement for dark mode:
-    - Fixed height to align with other metrics
-    - Auto-shrinking font for long values
-    - Dark mode styling
-    """
-    container_height = 100  # pixels
-
-    # Auto-shrink font size based on value length
-    value_length = len(str(value))
-    value_font = max(20, min(60, container_height // 2 - value_length))  # shrink if too long
-    label_font = max(12, value_font // 2.5)
-
-    st.markdown(f"""
-    <div style="
-        display:flex;
-        flex-direction:column;
-        align-items:center;
-        justify-content:center;
-        text-align:center;
-        border:1px solid #262730;  /* dark mode border */
-        border-radius:8px;
-        padding:10px;
-        height:{container_height}px;
-        box-sizing:border-box;
-        background-color:var(--stMetricBackgroundColor, #1e1e25);  /* dark background */
-    ">
-        <div style="font-size:{label_font}px; color:#d3d3d3; margin-bottom:3px;">{label}</div>
-        <div style="font-size:{value_font}px; font-weight:600; line-height:1.1; color:white;">{value}</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-

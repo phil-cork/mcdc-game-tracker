@@ -6,27 +6,28 @@ from utils.data_loader import get_heatmap_data
 
 def render(heatmap_df):
 
-    st.title("Hero/Aspect Heatmap")
+    st.title("Hero & Aspect Heatmap")
+    st.markdown("Can we fill in every hero and aspect over the course of the weekend? Let's find out!")
 
     col1, col2, col3 = st.columns(3, gap='xsmall')
 
     with col1:
 
-        heatmap = heatmap_chart(heatmap_df.iloc[0:138,:], x='individual_aspect', y='hero', color='value',
+        heatmap = heatmap_chart(heatmap_df.iloc[0:138,:], x='aspect', y='hero', color='value',
                             x_title="Aspect", y_title="Hero", color_title="Value")
 
         st.altair_chart(heatmap, use_container_width=False)
 
     with col2:
 
-        heatmap = heatmap_chart(heatmap_df.iloc[138:276, :], x='individual_aspect', y='hero', color='value',
+        heatmap = heatmap_chart(heatmap_df.iloc[138:276, :], x='aspect', y='hero', color='value',
                             x_title="Aspect", y_title="Hero", color_title="Value")
 
         st.altair_chart(heatmap, use_container_width=False)
 
     with col3:
 
-        heatmap = heatmap_chart(heatmap_df.iloc[276:,:], x='individual_aspect', y='hero', color='value',
+        heatmap = heatmap_chart(heatmap_df.iloc[276:,:], x='aspect', y='hero', color='value',
                             x_title="Aspect", y_title="Hero", color_title="Value")
 
         st.altair_chart(heatmap, use_container_width=False)

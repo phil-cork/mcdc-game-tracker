@@ -10,18 +10,20 @@ def run_data_pipeline(df):
     
     player_df = reshape_players(df)
 
-    player_df = merge_aspects(player_df)
-
-    aspect_df = explode_with_weights(player_df, 'aspect', 'individual_aspect')
-    aspect_df = replace_with_other(aspect_df,
-                                   allowed_set = set(['Aggression', 'Basic', 'Leadership', 'Justice', 'Pool', 'Protection']),
-                                   col='individual_aspect')
+    player_df = replace_with_other(player_df,
+                                   allowed_set = set(['Aggression', 'Basic', 'Leadership', 'Justice', 
+                                                      'Pool', 'Protection', 'Multi-Aspect']),
+                                   col='aspect')
     
-    heatmap_df = get_heatmap_data(aspect_df[['hero', 'individual_aspect', 'value']])
+    hero_aspect_df = player_df.groupby(['hero', 'aspect']).aggregate(plays=('submission_id', 'count')).reset_index()
+
+    aspect_df = player_df.groupby('aspect').agg(plays=('submission_id', 'count')).reset_index()
+    
+    heatmap_df = get_heatmap_data(player_df[['hero', 'aspect']])
 
     full_df = pd.merge(player_df, game_df, how='left', on='submission_id')
 
-    return game_df, player_df, aspect_df, heatmap_df, full_df
+    return game_df, player_df, hero_aspect_df, aspect_df, heatmap_df, full_df
 
 
 def load_data():
@@ -79,7 +81,7 @@ def reshape_players(
         value_name='value'
     )
 
-    # from the long format, extract the feature (name, her, aspect) and the player number 
+    # from the long format, extract the feature (name, hero, aspect) and the player number 
     # and store it in a dataframe that is the 'variable' column, split across two columns
     extracted = long['variable'].str.extract(
         r'^(?P<feature>.+)_player_(?P<player_num>\d+)$'
@@ -114,45 +116,6 @@ def reshape_players(
     return player_df
 
 
-def merge_aspects(df):
-    # merge aspect and multi-aspect together
-    df['aspect'] = df['aspect'].fillna(df['multi_aspect'])
-    df.drop('multi_aspect', axis=1, inplace=True)
-    return df
-
-
-def most_frequent_value(df: pd.DataFrame, column: str) -> str:
-    if column not in df.columns:
-        raise ValueError(f"Column '{column}' not found in DataFrame.")
-    
-    # Use value_counts for efficiency
-    most_freq = df[column].value_counts().idxmax()
-    
-    # Convert to string before returning
-    return str(most_freq)
-
-
-def explode_with_weights(df, col, new_col, sep=", "):
-
-    # Split into lists
-    df = df.copy()
-    df["_items"] = df[col].str.split(sep)
-
-    # Number of items per row
-    df["_n_items"] = df["_items"].str.len()
-
-    # Explode
-    out = df.explode("_items")
-
-    # Assign value = 1 / number of items
-    out["value"] = 1 / out["_n_items"]
-
-    # Clean up
-    out = out.drop(columns=["_n_items"]).rename(columns={"_items": new_col})
-
-    return out
-
-
 def replace_with_other(df, allowed_set:set, col:str):
     df[col] = df[col].where(df[col].isin(allowed_set), "Other")
     return df
@@ -160,8 +123,12 @@ def replace_with_other(df, allowed_set:set, col:str):
 
 def get_heatmap_data(current_form_df):
 
-    aspect_list = ['Aggression', 'Basic', 'Justice', 'Leadership',
-                                       'Pool', "Protection"]
+    # create a new column that gives each entry a count of 1
+    # to test abensence with fillna below
+    current_form_df['value'] = 1
+
+    aspect_list = ['Aggression', 'Justice', 'Leadership', 'Protection',
+                   'Pool', "Basic"]
     
     hero_list = ["Black Panther (T'challa)", "Captain Marvel", "Ironman", "She-Hulk",
         "Spider-Man (Peter)", "Captain America", "Ms. Marvel", "Thor", 
@@ -178,10 +145,10 @@ def get_heatmap_data(current_form_df):
 
     heatmap_df = pd.MultiIndex.from_product(
             [hero_list, aspect_list],
-            names=['hero', 'individual_aspect']
+            names=['hero', 'aspect']
         ).to_frame(index=False)
     
-    heatmap_df = pd.merge(heatmap_df, current_form_df, how='left', on=['hero', 'individual_aspect']).fillna(0)
+    heatmap_df = pd.merge(heatmap_df, current_form_df, how='left', on=['hero', 'aspect']).fillna(0)
     heatmap_df.sort_values(by='hero', inplace=True)
     heatmap_df = heatmap_df.reset_index().drop('index', axis=1)
     heatmap_df = heatmap_df.drop_duplicates()

@@ -3,7 +3,7 @@ from utils.charts import bar_chart
 
 def render(game_df):
 
-    st.title("Scenarios")
+    st.title("Scenarios Played & Outcomes")
 
     scenario_col, difficulty_col = st.columns(2)
 
