@@ -3,7 +3,7 @@ from utils.charts import bar_chart, donut_chart
 
 def render(aspect_df):
 
-    st.title("Aspects")
+    st.title("Decks Played by Aspect")
    
     col1, col2 = st.columns([2,1])
 
@@ -16,4 +16,4 @@ def render(aspect_df):
         
     with col2:
         st.altair_chart(donut_chart(aspect_df, category_col='aspect',
-                                    value_col='plays', colorScheme='aspect'))
+                                    value_col='percent', colorScheme='aspect'))

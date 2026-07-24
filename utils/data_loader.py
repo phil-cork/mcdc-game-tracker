@@ -23,25 +23,35 @@ aspect_list = ['Aggression', 'Justice', 'Leadership', 'Protection',
 
 def run_data_pipeline(df):
     
+    # for stats, keep only relevant columns
     game_df = df[['submission_id', 'submission_time', 'region', 'number_of_players',
               'scenario', 'difficulty', 'skirmish_mode', 'outcome']].copy().drop_duplicates()
     
+    # for scenarios, group by the scenario name and difficulty, condensing down to standard and expert
+    scenario_df = game_df.groupby(['scenario', 'difficulty']).aggregate(plays=('submission_id', 'count')).reset_index()
+    scenario_df['difficulty'] = np.where(scenario_df['difficulty'].str.contains('Standard'), "Standard", "Expert")
+    
+    # pivot players from wider to longer
     player_df = reshape_players(df)
-
+    # drop all custom aspects, if any, to Other
     player_df = replace_with_other(player_df,
                                    allowed_set = set(['Aggression', 'Basic', 'Leadership', 'Justice', 
                                                       'Pool', 'Protection', 'Multi-Aspect']),
                                    col='aspect')
     
+    # for heroes, aggregate both by hero and aspect for stacked bar chart
     hero_aspect_df = player_df.groupby(['hero', 'aspect']).aggregate(plays=('submission_id', 'count')).reset_index()
 
+
+    # for aspects, total up only aspect plays, then calculate percentages for donut chart
     aspect_df = player_df.groupby('aspect').agg(plays=('submission_id', 'count')).reset_index()
+    aspect_df['percent'] = round(aspect_df['plays'] / sum(aspect_df['plays']), 3)*100
     
+    # generate heatmap data in separate function
     heatmap_df = get_heatmap_data(player_df[['hero', 'aspect']])
 
-    full_df = pd.merge(player_df, game_df, how='left', on='submission_id')
 
-    return game_df, player_df, hero_aspect_df, aspect_df, heatmap_df, full_df
+    return game_df, scenario_df, player_df, hero_aspect_df, aspect_df, heatmap_df
 
 
 def load_data():

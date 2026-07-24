@@ -30,7 +30,7 @@ if region != 'All':
     df = df[df['region']==region]
 
 # create subsequent datasets from optionally filtered data
-game_df, player_df, hero_aspect_df, aspect_df, heatmap_df, full_df = run_data_pipeline(df)
+game_df, scenario_df, player_df, hero_aspect_df, aspect_df, heatmap_df = run_data_pipeline(df)
 
 stats_tab, scenarios_tab, heroes_tab, aspects_tab, heatmap_tab, player_tab = st.tabs(['Stats',
                                                                      'Scenarios',
@@ -43,7 +43,7 @@ with stats_tab:
     stats.render(game_df, player_df)
 
 with scenarios_tab: 
-    scenarios.render(game_df)
+    scenarios.render(scenario_df)
 
 with heroes_tab:
     heroes.render(hero_aspect_df)

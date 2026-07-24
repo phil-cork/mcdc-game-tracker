@@ -5,7 +5,7 @@ from utils.data_loader import hero_list
 
 def render(heatmap_df):
 
-    st.title("Hero & Aspect Heatmap")
+    st.header("Hero & Aspect Heatmap")
     st.markdown("Can we fill in every hero and aspect over the course of the weekend? Let's find out!")
 
     col1, col2, col3 = st.columns(3, gap='xsmall')
