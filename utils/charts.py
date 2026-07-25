@@ -68,7 +68,8 @@ def donut_chart(df: pd.DataFrame, category_col: str, value_col: str = None,
         .encode(
             theta=alt.Theta(field="angle", type="quantitative"),
             color=color_encoding,
-            tooltip=[alt.Tooltip(category_col), alt.Tooltip(value_col)]
+            tooltip=[alt.Tooltip(category_col, title=f"{category_col}".title()), 
+                     alt.Tooltip(value_col, title=f"{value_col}".title())]
         )
         .properties(title=title, width=400, height=400)
     )
@@ -157,6 +158,9 @@ def bar_chart(df: pd.DataFrame,
         text=text,
         x=alt.X(x),
         y=alt.Y(y,sort=order),
+        tooltip=[
+            alt.Tooltip(y, title=f"{y}".title()),
+            alt.Tooltip(x, title=f"{x}".title())]
     )
         chart = chart + chart_text
     
@@ -199,10 +203,9 @@ def stacked_bar_chart(df, group_col, category_col, count_col, color_scheme):
                                        scale=color_scheme_map[color_scheme],
                                        legend=alt.Legend(orient='top')),
         tooltip=[alt.Tooltip(group_col, title=f"{group_col}".title()), 
-                 alt.Tooltip(category_col, title=f"{category_col}".title()),
-                 alt.Tooltip(count_col, title=f"{count_col}".title())]
-        
-                                    )
+                       alt.Tooltip(category_col, title=f"{category_col}".title()),
+                       alt.Tooltip(count_col, title=f"{count_col}".title())]
+                )
             )
 
     totals = (alt.Chart(df)
@@ -217,7 +220,9 @@ def stacked_bar_chart(df, group_col, category_col, count_col, color_scheme):
                     f"{group_col}:N",
                     sort=order),
                 x=alt.X(f"sum({count_col}):Q"),
-                text=alt.Text(f"sum({count_col}):Q")
+                text=alt.Text(f"sum({count_col}):Q"),
+                tooltip=[alt.Tooltip(group_col, title=f"{group_col}".title()),
+                         alt.Tooltip(f"sum({count_col}):Q", title="Total")]
                 )
             )
 
