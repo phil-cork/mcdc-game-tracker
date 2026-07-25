@@ -7,5 +7,5 @@ def render(game_df):
     st.altair_chart(
         stacked_bar_chart(game_df,
                     group_col='scenario', category_col='difficulty', count_col='plays',
-                     color_scheme='scenario')
+                     color_scheme='difficulty')
         )

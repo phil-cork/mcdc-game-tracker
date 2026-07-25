@@ -21,15 +21,24 @@ hero_list.sort()
 aspect_list = ['Aggression', 'Justice', 'Leadership', 'Protection',
                    'Pool', "Basic", "Multi-Aspect"]
 
-def run_data_pipeline(df):
+def run_data_pipeline(df, region:str):
+
+    # before filtering down to region, create a copy for regional comparison
+    region_df = df.copy()
+    region_df = region_df.groupby(['region']).aggregate(plays=('submission_id', 'count')).reset_index()
+
+    # if filter selected, filter down
+    if region != 'All':
+        df = df[df['region']==region]
     
     # for stats, keep only relevant columns
     game_df = df[['submission_id', 'submission_time', 'region', 'number_of_players',
               'scenario', 'difficulty', 'skirmish_mode', 'outcome']].copy().drop_duplicates()
+    # condensing down to standard and expert for plotting
+    game_df['difficulty'] = np.where(game_df['difficulty'].str.contains('Standard'), "Standard", "Expert")
     
-    # for scenarios, group by the scenario name and difficulty, condensing down to standard and expert
+    # for scenarios, group by the scenario name and difficulty, 
     scenario_df = game_df.groupby(['scenario', 'difficulty']).aggregate(plays=('submission_id', 'count')).reset_index()
-    scenario_df['difficulty'] = np.where(scenario_df['difficulty'].str.contains('Standard'), "Standard", "Expert")
     
     # pivot players from wider to longer
     player_df = reshape_players(df)
@@ -38,6 +47,7 @@ def run_data_pipeline(df):
                                    allowed_set = set(['Aggression', 'Basic', 'Leadership', 'Justice', 
                                                       'Pool', 'Protection', 'Multi-Aspect']),
                                    col='aspect')
+    player_df = pd.merge(player_df, game_df[['submission_id', 'difficulty']], on='submission_id')
     
     # for heroes, aggregate both by hero and aspect for stacked bar chart
     hero_aspect_df = player_df.groupby(['hero', 'aspect']).aggregate(plays=('submission_id', 'count')).reset_index()
@@ -51,7 +61,7 @@ def run_data_pipeline(df):
     heatmap_df = get_heatmap_data(player_df[['hero', 'aspect']])
 
 
-    return game_df, scenario_df, player_df, hero_aspect_df, aspect_df, heatmap_df
+    return game_df, scenario_df, player_df, hero_aspect_df, aspect_df, heatmap_df, region_df
 
 
 def load_data():

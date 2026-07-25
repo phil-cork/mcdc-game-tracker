@@ -9,7 +9,7 @@ color_scheme_map = {
     range=['#FF4500', '#b4b4b4', '#FFD700', '#0086EB',
            'pink', '#00C853', "#8766C8", '#545454']),
     
-    'scenario' : alt.Scale(
+    'difficulty' : alt.Scale(
     domain=['Standard', 'Expert'],
     range=['#518cca', '#f78f3f'])
     }
@@ -131,7 +131,7 @@ def bar_chart(df: pd.DataFrame,
                                        scale=color_scheme_map[colorScheme],
                                        legend=alt.Legend(orient='top'))
     
-    elif color is not None and colorScheme == 'scenario':
+    elif color is not None and colorScheme == 'difficulty':
         encodings['color'] = alt.Color(color, title=f"{color}".title(),
                                        scale=color_scheme_map[colorScheme],
                                        legend=alt.Legend(orient='bottom'))
@@ -243,8 +243,8 @@ def dot_matrix_plot(df, x:str, y:str, x_sort_order=[]):
 
     # Horizontal guide line per row, spanning all columns
     lines = base.mark_line(color='darkgrey', strokeWidth=.5).encode(
-        x=alt.X(f'{x}:N', axis=alt.Axis(orient='top'), title=None, sort=x_sort_order),
-        y=alt.Y(f'{y}:N', sort='ascending', title=None, axis=alt.Axis(labelLimit=300)),
+        x=alt.X(f'{x}:N', axis=alt.Axis(orient='top', labelAngle=0), title=None, sort=x_sort_order),
+        y=alt.Y(f'{y}:N', sort='ascending', title=None, axis=alt.Axis(labelLimit=300, labelFontSize=14, labelPadding=10)),
         tooltip=alt.value(None),
         detail=f'{y}:N'   # keeps each row's line separate
     )
@@ -252,12 +252,16 @@ def dot_matrix_plot(df, x:str, y:str, x_sort_order=[]):
     dots_df = df.dropna()
 
     # Dots on top
-    dots = alt.Chart(dots_df).mark_circle(size=250).encode(
+    dots = alt.Chart(dots_df).mark_circle(size=275).encode(
         x=alt.X(f'{x}:N', sort=x_sort_order),
         y=alt.Y(f'{y}:N', sort='ascending'),
         tooltip=alt.value(None),
         color=alt.Color('aspect:N', scale=color_scheme_map.get('aspect'), legend=None),
-        opacity=alt.condition(alt.datum.value, alt.value(1.0), alt.value(0.15))
+        opacity=alt.condition(alt.datum.value, alt.value(1.0), alt.value(0.15)),
     )
 
-    return (lines + dots)
+    heatmap = lines + dots
+    heatmap = heatmap.configure_scale(
+    bandPaddingInner=0.6)
+
+    return (heatmap)

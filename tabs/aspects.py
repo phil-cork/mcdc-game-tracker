@@ -3,7 +3,7 @@ from utils.charts import bar_chart, donut_chart
 
 def render(aspect_df):
 
-    st.title("Decks Played by Aspect")
+    st.header("Decks Played by Aspect")
    
     col1, col2 = st.columns([2,1])
 
