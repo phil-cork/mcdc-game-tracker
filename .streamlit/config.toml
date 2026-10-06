@@ -1,0 +1,8 @@
+[theme]
+base="dark"
+textColor="white"
+primaryColor="#D4B01D"
+backgroundColor="black"
+
+#font="Oswald:https://fonts.googleapis.com/css2?family=Oswald&display=swap"
+headingFont="'Special Elite':https://fonts.googleapis.com/css2?family=Special+Elite&display=swap"

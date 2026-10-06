@@ -11,4 +11,3 @@ wheels/
 
 # app specific
 .DS_Store
-.streamlit
