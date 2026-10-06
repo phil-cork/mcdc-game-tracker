@@ -44,7 +44,7 @@ stats_tab, scenarios_tab, heroes_tab, aspects_tab, heatmap_tab, player_tab, regi
                                                                      'Scenarios',
                                                                      'Heroes',
                                                                      'Aspects',
-                                                                     'Heatmap',
+                                                                     'Checklist',
                                                                      'Players',
                                                                      'Regions'])
 
