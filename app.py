@@ -1,4 +1,5 @@
 import streamlit as st
+import pandas as pd
 from streamlit_autorefresh import st_autorefresh
 from utils.data_loader import run_data_pipeline, load_data
 from tabs import stats, scenarios, heroes, players, heatmap, aspects, regions
@@ -7,6 +8,9 @@ st.set_page_config(layout="wide")
 
 # Auto-refresh every 30 seconds
 st_autorefresh(interval=30_000, key="autorefresh_timer")
+
+# pull in raw Google Sheet data and format columns
+df = load_data()
 
 with st.container(horizontal=True):
   st.image("https://images.squarespace-cdn.com/content/68505f7ba6f6d35a7e5e0412/efa683f1-b11e-4ad5-83e6-6f482f9f0477/mdc-game-tracker-3.png",
@@ -20,9 +24,27 @@ with st.container(horizontal=True):
                  icon=":material/open_in_new:")
 st.divider()
 
+with st.container():
+    st.header("Download Player Data")
 
-# pull in raw Google Sheet data and format columns
-df = load_data()
+    # bring in all usernames and sort into unique list
+    USERNAMES_LIST = ['Select a Player'] + sorted(
+            pd.unique(df[['name_player_1', 'name_player_2', 'name_player_3', 'name_player_4']].stack().astype(str)),
+            key=str.lower,
+        )
+    
+    # create selectbox and store username
+    st.selectbox(label='Player Name', options=USERNAMES_LIST, key='username_filter', width=300)
+    st.session_state.setdefault("username_filter", USERNAMES_LIST[0])
+    username = st.session_state.username_filter
+    username_filename = username.replace(" ", "-")
+
+    # filter dataframe and export data
+    download_df = df[(df['name_player_1']==username) | (df['name_player_2']==username) | (df['name_player_3']==username) | (df['name_player_4']==username)].copy()
+    st.download_button(label='Download', data=download_df.to_csv(), file_name=f"exports/mcdc26-game-tracker-output-{username_filename}.csv", icon=':material/download:')
+
+
+st.divider()
 
 # create list of regions for top-level filter
 regions_list = ['All'] + df['region'].unique().tolist()

@@ -11,3 +11,5 @@ wheels/
 
 # app specific
 .DS_Store
+*.csv
+secrets.toml
